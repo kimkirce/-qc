@@ -1,0 +1,858 @@
+<script>
+    // 페이지 전환
+    function showPage(pageId) {
+      document.querySelectorAll('.page-content').forEach(page => {
+        page.classList.remove('active');
+      });
+
+      const target = document.getElementById(pageId);
+      if (target) {
+        target.classList.add('active');
+      }
+
+      document.querySelectorAll('.nav-item, .nav-subitem').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      if (event && event.target) {
+        event.target.closest('.nav-item, .nav-subitem')?.classList.add('active');
+      }
+
+      if (window.innerWidth <= 1024) {
+        document.getElementById('sidebar').classList.remove('active');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // TP-101-02 페이지 열릴 때 데이터 로드
+      if (pageId === 'tp101-02') {
+        setTimeout(function() {
+          loadEvaluations();
+        }, 300);
+      }
+      
+      // 업체등록 페이지 열릴 때 데이터 로드
+      if (pageId === 'company-register') {
+        setTimeout(function() {
+          console.log('업체등록 페이지 열림 - 목록 로드 시작');
+          loadCompanyList();
+        }, 300);
+      }
+      
+      // 메뉴관리 페이지 열릴 때 데이터 로드
+      if (pageId === 'menu-manage') {
+        setTimeout(function() {
+          loadMenuList();
+        }, 300);
+      }
+    }
+
+    // 서브메뉴 토글
+    function toggleSubmenu(submenuId) {
+      const submenu = document.getElementById(submenuId);
+      const parentItem = event.target.closest('.nav-item');
+      
+      submenu.classList.toggle('show');
+      parentItem.classList.toggle('expanded');
+      
+      document.querySelectorAll('.nav-submenu').forEach(menu => {
+        if (menu.id !== submenuId) {
+          menu.classList.remove('show');
+        }
+      });
+      
+      document.querySelectorAll('.nav-item').forEach(item => {
+        if (item !== parentItem && !item.classList.contains('nav-subitem')) {
+          item.classList.remove('expanded');
+        }
+      });
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // TP-101 평가 관련 함수들
+    function calculateTotal() {
+      const career = parseInt(document.querySelector('input[name="career"]:checked')?.value || 0);
+      const manpower = parseInt(document.querySelector('input[name="manpower"]:checked')?.value || 0);
+      const finance = parseInt(document.querySelector('input[name="finance"]:checked')?.value || 0);
+      const price = parseInt(document.querySelector('input[name="price"]:checked')?.value || 0);
+      const quality = parseInt(document.querySelector('input[name="quality"]:checked')?.value || 0);
+      const evaluator = parseInt(document.querySelector('input[name="evaluator"]:checked')?.value || 0);
+      const iso = document.getElementById('isoBonus')?.checked ? 10 : 0;
+
+      document.getElementById('careerScore').textContent = career;
+      document.getElementById('manpowerScore').textContent = manpower;
+      document.getElementById('financeScore').textContent = finance;
+      document.getElementById('priceScore').textContent = price;
+      document.getElementById('qualityScore').textContent = quality;
+      document.getElementById('evaluatorScore').textContent = evaluator;
+      document.getElementById('isoScore').textContent = iso;
+
+      const total = career + manpower + finance + price + quality + evaluator + iso;
+      document.getElementById('totalScore').textContent = total;
+
+      return total;
+    }
+
+    function newEvaluation() {
+      document.getElementById('companyName').value = '';
+      document.getElementById('businessNo').value = '';
+      document.getElementById('ceo').value = '';
+      document.getElementById('establishDate').value = '';
+      document.getElementById('address').value = '';
+      document.getElementById('evalMethodEtc').value = '';
+      document.getElementById('evaluatorOpinion').value = '';
+      document.getElementById('evalDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('evaluatorName').value = '';
+
+      document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+      document.getElementById('isoBonus').checked = false;
+
+      calculateTotal();
+      document.getElementById('evaluationForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveEvaluation() {
+      const companyName = document.getElementById('companyName').value;
+      const evalDate = document.getElementById('evalDate').value;
+      const evaluatorName = document.getElementById('evaluatorName').value;
+      const totalScore = calculateTotal();
+
+      if (!companyName) {
+        alert('❌ 업체명을 입력해주세요.');
+        return;
+      }
+
+      if (!evalDate) {
+        alert('❌ 평가일자를 입력해주세요.');
+        return;
+      }
+
+      if (!evaluatorName) {
+        alert('❌ 평가자를 입력해주세요.');
+        return;
+      }
+
+      if (totalScore === 0) {
+        alert('❌ 평가 항목을 선택해주세요.');
+        return;
+      }
+
+      const data = {
+        companyName: companyName,
+        businessNo: document.getElementById('businessNo').value,
+        ceo: document.getElementById('ceo').value,
+        establishDate: document.getElementById('establishDate').value,
+        address: document.getElementById('address').value,
+        evalMethod: document.querySelector('input[name="evalMethod"]:checked')?.value,
+        evalMethodEtc: document.getElementById('evalMethodEtc').value,
+        career: parseInt(document.querySelector('input[name="career"]:checked')?.value || 0),
+        manpower: parseInt(document.querySelector('input[name="manpower"]:checked')?.value || 0),
+        finance: parseInt(document.querySelector('input[name="finance"]:checked')?.value || 0),
+        price: parseInt(document.querySelector('input[name="price"]:checked')?.value || 0),
+        quality: parseInt(document.querySelector('input[name="quality"]:checked')?.value || 0),
+        evaluator: parseInt(document.querySelector('input[name="evaluator"]:checked')?.value || 0),
+        iso: document.getElementById('isoBonus').checked,
+        totalScore: totalScore,
+        opinion: document.getElementById('evaluatorOpinion').value,
+        evalDate: evalDate,
+        evaluatorName: evaluatorName
+      };
+
+      const saveBtn = event.target;
+      saveBtn.disabled = true;
+      saveBtn.textContent = '💾 저장 중...';
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          alert('✅ ' + result.message);
+          newEvaluation();
+          loadEvaluations();
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '💾 저장';
+        })
+        .withFailureHandler(function(error) {
+          alert('❌ 저장 실패: ' + error.message);
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '💾 저장';
+        })
+        .saveTP101Evaluation(data);
+    }
+
+    function loadEvaluations() {
+      console.log('========================================');
+      console.log('평가 목록 로드 시작');
+      console.log('시간:', new Date().toISOString());
+      console.log('========================================');
+      
+      const tbody = document.getElementById('evaluationList');
+      
+      if (!tbody) {
+        console.error('evaluationList 요소를 찾을 수 없습니다');
+        return;
+      }
+      
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-tertiary);"><div class="loading"></div><div style="margin-top: 12px;">데이터를 불러오는 중...</div></td></tr>';
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('========================================');
+          console.log('서버 응답 수신');
+          console.log('응답 타입:', typeof result);
+          console.log('응답 내용:', result);
+          console.log('========================================');
+          
+          // null 체크
+          if (result === null || result === undefined) {
+            console.error('❌ null 또는 undefined 반환!');
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 40px;">
+                  <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+                  <div style="font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">null 반환됨!</div>
+                  <div style="color: var(--text-tertiary); font-size: 14px; margin-bottom: 24px;">
+                    함수가 null을 반환했습니다. 재배포가 필요합니다.
+                  </div>
+                </td>
+              </tr>
+            `;
+            return;
+          }
+          
+          // success 속성 체크
+          if (result.success === false) {
+            console.error('❌ 함수 실행 실패:', result.message);
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 40px;">
+                  <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+                  <div style="font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">${result.message || '데이터 로드 실패'}</div>
+                  <div style="color: var(--text-tertiary); font-size: 14px; margin-bottom: 24px;">
+                    단계: ${result.step || '알 수 없음'}
+                  </div>
+                </td>
+              </tr>
+            `;
+            return;
+          }
+          
+          // data 속성 체크
+          if (!result.data) {
+            console.error('❌ result.data가 없습니다!');
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 30px;">
+                  <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                  <div style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--warning);">데이터 형식 오류</div>
+                </td>
+              </tr>
+            `;
+            return;
+          }
+          
+          // 데이터가 비어있는 경우
+          if (result.data.length === 0) {
+            console.log('ℹ️ 데이터가 비어있습니다');
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="7" class="empty-state">
+                  <div class="icon">📊</div>
+                  <h3>평가 데이터가 없습니다</h3>
+                  <p>위 양식을 작성하고 저장 버튼을 눌러주세요</p>
+                </td>
+              </tr>
+            `;
+            return;
+          }
+
+          // 정상 처리 - 올바른 필드명 사용
+          console.log('✅ 데이터 표시 시작:', result.data.length + '건');
+          tbody.innerHTML = '';
+          result.data.forEach(function(eval, index) {
+            const selected = eval.selectionStatus === '선정';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="text-align: center;">${eval.no || index + 1}</td>
+              <td>${eval.companyName || '-'}</td>
+              <td style="text-align: center;">${eval.evaluationDate || '-'}</td>
+              <td style="text-align: center; font-weight: 700; color: ${selected ? 'var(--success)' : 'var(--danger)'};">${eval.totalScore || 0}점</td>
+              <td style="text-align: center;"><span class="status-badge ${selected ? 'success' : 'danger'}">${eval.selectionStatus || '미선정'}</span></td>
+              <td style="text-align: center;">${eval.evaluatorName || '-'}</td>
+              <td style="text-align: center;">
+                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; margin-right: 4px;" onclick="viewEvaluationFromSheet(${eval.rowNum})">👁️ 보기</button>
+                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="deleteEvaluationFromSheet(${eval.rowNum})">🗑️ 삭제</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          console.log('========================================');
+          console.log('✅ 평가 목록 표시 완료:', result.data.length + '건');
+          console.log('버전:', result.version);
+          console.log('========================================');
+        })
+        .withFailureHandler(function(error) {
+          console.error('========================================');
+          console.error('❌ 서버 오류 발생');
+          console.error('오류 내용:', error);
+          console.error('========================================');
+          
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 30px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">💥</div>
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--danger);">서버 오류 발생</div>
+                <div style="color: var(--text-tertiary); font-size: 14px; margin-bottom: 20px;">
+                  ${error.message || error}
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .getTP101Evaluations();
+    }
+
+    function viewEvaluationFromSheet(rowNum) {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (!result || !result.success || !result.data) {
+            alert('❌ 데이터를 찾을 수 없습니다.');
+            return;
+          }
+
+          // rowNum으로 데이터 찾기
+          const eval = result.data.find(e => e.rowNum === rowNum);
+          if (!eval) {
+            alert('❌ 데이터를 찾을 수 없습니다.');
+            return;
+          }
+
+          // 올바른 필드명으로 폼 채우기
+          document.getElementById('companyName').value = eval.companyName || '';
+          document.getElementById('businessNo').value = eval.businessNumber || '';
+          document.getElementById('ceo').value = eval.representative || '';
+          document.getElementById('establishDate').value = eval.establishmentDate || '';
+          document.getElementById('address').value = eval.address || '';
+          document.getElementById('evalMethodEtc').value = eval.evalMethodEtc || '';
+          document.getElementById('evaluatorOpinion').value = eval.evaluatorOpinion || '';
+          document.getElementById('evalDate').value = eval.evaluationDate || '';
+          document.getElementById('evaluatorName').value = eval.evaluatorName || '';
+
+          // 평가방법 라디오 버튼
+          if (eval.evaluationMethod) {
+            document.querySelectorAll('input[name="evalMethod"]').forEach(radio => {
+              if (radio.value === eval.evaluationMethod) radio.checked = true;
+            });
+          }
+
+          // 점수 라디오 버튼들
+          if (eval.experienceScore) {
+            const careerRadio = document.querySelector(`input[name="career"][value="${eval.experienceScore}"]`);
+            if (careerRadio) careerRadio.checked = true;
+          }
+          if (eval.personnelScore) {
+            const manpowerRadio = document.querySelector(`input[name="manpower"][value="${eval.personnelScore}"]`);
+            if (manpowerRadio) manpowerRadio.checked = true;
+          }
+          if (eval.financialScore) {
+            const financeRadio = document.querySelector(`input[name="finance"][value="${eval.financialScore}"]`);
+            if (financeRadio) financeRadio.checked = true;
+          }
+          if (eval.priceScore) {
+            const priceRadio = document.querySelector(`input[name="price"][value="${eval.priceScore}"]`);
+            if (priceRadio) priceRadio.checked = true;
+          }
+          if (eval.qualityScore) {
+            const qualityRadio = document.querySelector(`input[name="quality"][value="${eval.qualityScore}"]`);
+            if (qualityRadio) qualityRadio.checked = true;
+          }
+          if (eval.evaluatorScore) {
+            const evaluatorRadio = document.querySelector(`input[name="evaluator"][value="${eval.evaluatorScore}"]`);
+            if (evaluatorRadio) evaluatorRadio.checked = true;
+          }
+          
+          // ISO 인증
+          document.getElementById('isoBonus').checked = (eval.isoCertification === 'Y');
+
+          calculateTotal();
+          document.getElementById('evaluationForm').scrollIntoView({ behavior: 'smooth' });
+        })
+        .withFailureHandler(function(error) {
+          alert('❌ 데이터 로드 실패: ' + error.message);
+        })
+        .getTP101Evaluations();
+    }
+
+    function deleteEvaluationFromSheet(rowNum) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          alert('✅ ' + result.message);
+          loadEvaluations();
+        })
+        .withFailureHandler(function(error) {
+          alert('❌ 삭제 실패: ' + error.message);
+        })
+        .deleteTP101Evaluation(rowNum);
+    }
+
+    function printEvaluation() {
+      const companyName = document.getElementById('companyName').value;
+      
+      if (!companyName) {
+        alert('❌ 출력할 평가 데이터를 먼저 입력하거나 목록에서 선택해주세요.');
+        return;
+      }
+
+      alert('📄 PDF 출력 기능은 개발 중입니다.\n\n현재는 브라우저의 인쇄 기능(Ctrl+P)을 사용해주세요.');
+    }
+
+    // ========================================
+    // 업체 관리 함수들
+    // ========================================
+    
+    // 업체 목록 로드
+    function loadCompanyList() {
+      console.log('업체 목록 로드 시작');
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('업체 목록 로드 결과:', result);
+          
+          if (result.success && result.data) {
+            updateCompanyDropdown(result.data);
+            updateCompanyTable(result.data);
+          } else {
+            console.error('업체 목록 로드 실패:', result.message);
+            // 빈 목록으로 업데이트
+            updateCompanyDropdown([]);
+            updateCompanyTable([]);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('업체 목록 로드 에러:', error);
+          alert('❌ 업체 목록 로드 실패: ' + error.message);
+        })
+        .getCompanyList();
+    }
+    
+    // 업체 드롭다운 업데이트 (기존 필드명에 맞춤)
+    let companyDataCache = [];  // 업체 데이터 캐시
+    
+    function updateCompanyDropdown(companies) {
+      const select = document.getElementById('companyName');
+      if (!select) return;
+      
+      // 캐시에 저장
+      companyDataCache = companies;
+      
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">업체를 선택하세요</option>';
+      
+      companies.forEach(company => {
+        const option = document.createElement('option');
+        option.value = company.companyName;  // 기존 필드명
+        option.textContent = company.companyName;
+        if (company.companyName === currentValue) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+      
+      console.log(`업체 드롭다운 업데이트 완료: ${companies.length}개`);
+    }
+    
+    // 업체 선택 시 정보 자동 입력
+    function loadCompanyInfo() {
+      const selectedName = document.getElementById('companyName').value;
+      
+      if (!selectedName) {
+        // 선택 해제 시 초기화
+        document.getElementById('businessNo').value = '';
+        document.getElementById('ceo').value = '';
+        document.getElementById('address').value = '';
+        return;
+      }
+      
+      // 캐시에서 업체 정보 찾기
+      const company = companyDataCache.find(c => c.companyName === selectedName);
+      
+      if (company) {
+        document.getElementById('businessNo').value = company.businessNumber || '';
+        document.getElementById('ceo').value = company.representative || '';
+        document.getElementById('address').value = company.address || '';
+        
+        console.log('업체 정보 자동 입력 완료:', selectedName);
+      }
+    }
+    
+    // 업체 테이블 업데이트 (기존 필드명에 맞춤)
+    function updateCompanyTable(companies) {
+      const tbody = document.getElementById('companyListTable');
+      if (!tbody) return;
+      
+      if (companies.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="padding: 40px; text-align: center; color: var(--text-tertiary);">
+              <div style="font-size: 48px; margin-bottom: 16px;">🏢</div>
+              <div>등록된 업체가 없습니다</div>
+              <div style="font-size: 13px; margin-top: 8px;">위의 폼에서 새 업체를 추가해주세요</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = companies.map((company, index) => `
+        <tr style="border-bottom: 1px solid var(--border);">
+          <td style="padding: 12px; font-weight: 500;">${company.companyName || '-'}</td>
+          <td style="padding: 12px; color: var(--text-secondary);">${company.businessNumber || '-'}</td>
+          <td style="padding: 12px; color: var(--text-secondary);">${company.representative || '-'}</td>
+          <td style="padding: 12px; color: var(--text-secondary);">${company.manager || '-'}</td>
+          <td style="padding: 12px; color: var(--text-secondary);">${company.phone || '-'}</td>
+          <td style="padding: 12px; color: var(--text-secondary);">${company.email || '-'}</td>
+          <td style="padding: 12px; text-align: center;">
+            <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="deleteCompany(${company.no})">
+              🗑️ 삭제
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      
+      console.log(`업체 테이블 업데이트 완료: ${companies.length}개`);
+    }
+    
+    // 새 업체 추가 (기존 필드명에 맞춤)
+    function addNewCompany() {
+      const name = document.getElementById('newCompanyName').value.trim();
+      
+      if (!name) {
+        alert('❌ 업체명을 입력해주세요.');
+        return;
+      }
+      
+      const data = {
+        companyName: name,
+        businessNumber: document.getElementById('newCompanyBusinessNo').value.trim(),
+        representative: document.getElementById('newCompanyCeo').value.trim(),
+        manager: document.getElementById('newCompanyManager').value.trim(),
+        phone: document.getElementById('newCompanyPhone').value.trim(),
+        email: document.getElementById('newCompanyEmail').value.trim(),
+        address: document.getElementById('newCompanyAddress').value.trim()
+      };
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          alert('✅ ' + result.message);
+          
+          // 입력 폼 초기화
+          document.getElementById('newCompanyName').value = '';
+          document.getElementById('newCompanyBusinessNo').value = '';
+          document.getElementById('newCompanyCeo').value = '';
+          document.getElementById('newCompanyManager').value = '';
+          document.getElementById('newCompanyPhone').value = '';
+          document.getElementById('newCompanyEmail').value = '';
+          document.getElementById('newCompanyAddress').value = '';
+          
+          // 목록 새로고침
+          loadCompanyList();
+        })
+        .withFailureHandler(function(error) {
+          alert('❌ 저장 실패: ' + error.message);
+        })
+        .saveCompany(data);
+    }
+    
+    // 업체 삭제
+    function deleteCompany(no) {
+      if (!confirm('정말 이 업체를 삭제하시겠습니까?')) return;
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          alert('✅ ' + result.message);
+          loadCompanyList();
+        })
+        .withFailureHandler(function(error) {
+          alert('❌ 삭제 실패: ' + error.message);
+        })
+        .deleteCompany(no);
+    }
+    
+    // 업체 목록 저장 (재정렬 등의 변경사항 저장용)
+    function saveCompanyList() {
+      alert('ℹ️ 현재는 자동 저장됩니다.');
+    }
+
+    // 페이지 로드 시 초기화
+    window.addEventListener('load', function() {
+      console.log('품질관리 시스템 v2.0 로드 완료');
+      
+      // 업체 목록 자동 로드
+      
+      // 대시보드 통계 업데이트
+      updateDashboardStats();
+      loadCompanyList();
+
+
+    // ========================================
+    // 대시보드 통계 업데이트 함수
+    // ========================================
+    
+    function updateDashboardStats() {
+      console.log('대시보드 통계 업데이트 시작...');
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (!result || !result.success) {
+            console.error('통계 로드 실패:', result);
+            return;
+          }
+          
+          const stats = result.data;
+          console.log('받은 통계 데이터:', stats);
+          
+          // TP-101 공급사평가
+          updateStatCard('tp101-total', stats.tp101.totalCompanies);
+          updateStatCard('tp101-evaluated', stats.tp101.evaluatedCompanies);
+          
+          // TP-201 변경점관리
+          updateStatCard('tp201-changes', stats.tp201.totalChanges);
+          updateStatCard('tp201-pending', stats.tp201.pendingChanges);
+          
+          // TP-301 성적서발행
+          updateStatCard('tp301-docs', stats.tp301.totalDocuments);
+          updateStatCard('tp301-issued', stats.tp301.issuedCount);
+          
+          // TP-401 도면관리
+          updateStatCard('tp401-drawings', stats.tp401.totalDrawings);
+          updateStatCard('tp401-revisions', stats.tp401.revisionCount);
+          
+          // TP-501 현장관리
+          updateStatCard('tp501-sites', stats.tp501.totalSites);
+          updateStatCard('tp501-active', stats.tp501.activeSites);
+          
+          // TP-601 고객불만
+          updateStatCard('tp601-complaints', stats.tp601.totalComplaints);
+          updateStatCard('tp601-resolved', stats.tp601.resolvedRate + '%');
+          
+          // TP-701 공정검사
+          updateStatCard('tp701-inspections', stats.tp701.totalInspections);
+          updateStatCard('tp701-pass', stats.tp701.passRate + '%');
+          
+          // TP-801 아상동작검증
+          updateStatCard('tp801-tests', stats.tp801.totalTests);
+          updateStatCard('tp801-passed', stats.tp801.passedTests);
+          
+          // TP-901 작업표준서
+          updateStatCard('tp901-docs', stats.tp901.totalDocs);
+          updateStatCard('tp901-revisions', stats.tp901.revisionCount);
+          
+          // TP-1001 초품SOP
+          updateStatCard('tp1001-sops', stats.tp1001.totalSOPs);
+          updateStatCard('tp1001-approved', stats.tp1001.approvedSOPs);
+          
+          // TP-1101 검사기준
+          updateStatCard('tp1101-standards', stats.tp1101.totalStandards);
+          updateStatCard('tp1101-active', stats.tp1101.activeStandards);
+          
+          console.log('대시보드 통계 업데이트 완료!');
+        })
+        .withFailureHandler(function(error) {
+          console.error('통계 로드 에러:', error);
+        })
+        .getDashboardStats();
+    }
+    
+    function updateStatCard(id, value) {
+      const element = document.getElementById(id);
+      if (element) {
+        // 숫자에 천 단위 콤마 추가
+        const formattedValue = typeof value === 'number' ? 
+          value.toLocaleString('ko-KR') : value;
+        element.textContent = formattedValue;
+      }
+    }
+    // ========================================
+    // 메뉴 관리 함수들
+    // ========================================
+    
+    let currentMenuData = [];
+    let editingMenuId = null;
+    
+    function loadMenuList() {
+      // 현재 HTML에서 메뉴 구조를 읽어오기
+      const navItems = document.querySelectorAll('.nav-item:not(.nav-subitem)');
+      currentMenuData = [];
+      
+      navItems.forEach((item, index) => {
+        const icon = item.querySelector('.icon') ? item.querySelector('.icon').textContent : '📄';
+        const text = item.textContent.trim().replace(icon, '').trim();
+        const onclick = item.getAttribute('onclick');
+        const pageId = onclick ? onclick.match(/showPage\('([^']+)'\)/)?.[1] : '';
+        const hasSubmenu = item.querySelector('.expand-icon') !== null;
+        
+        currentMenuData.push({
+          id: pageId || `menu-${index}`,
+          icon: icon,
+          name: text,
+          pageId: pageId,
+          order: index + 1,
+          hasSubmenu: hasSubmenu
+        });
+      });
+      
+      renderMenuCards();
+    }
+    
+    function renderMenuCards() {
+      const container = document.getElementById('menuListContainer');
+      if (!container) return;
+      
+      container.innerHTML = currentMenuData.map(menu => `
+        <div class="menu-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; transition: all 0.3s ease;">
+          <div style="font-size: 32px; width: 60px; height: 60px; background: var(--bg-glass); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">${menu.icon}</div>
+          <div style="flex: 1;">
+            <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">${menu.name}</h4>
+            <div style="font-size: 13px; color: var(--text-tertiary);">
+              페이지 ID: ${menu.pageId || '-'} | 순서: ${menu.order}
+              ${menu.hasSubmenu ? ' | <span style="color: var(--primary);">하위 메뉴 있음</span>' : ''}
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="editMenu('${menu.id}')">✏️ 수정</button>
+            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="moveMenuUp('${menu.id}')" ${menu.order === 1 ? 'disabled' : ''}>⬆️</button>
+            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="moveMenuDown('${menu.id}')" ${menu.order === currentMenuData.length ? 'disabled' : ''}>⬇️</button>
+            <button class="btn btn-danger" style="padding: 8px 12px; font-size: 12px;" onclick="deleteMenu('${menu.id}')">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function addNewMenu() {
+      editingMenuId = null;
+      document.getElementById('editMenuIcon').value = '📄';
+      document.getElementById('editMenuName').value = '';
+      document.getElementById('editMenuPageId').value = '';
+      document.getElementById('editMenuOrder').value = currentMenuData.length + 1;
+      document.getElementById('editMenuHasSubmenu').checked = false;
+      
+      const modal = document.getElementById('menuEditModal');
+      modal.style.display = 'flex';
+    }
+    
+    function editMenu(menuId) {
+      const menu = currentMenuData.find(m => m.id === menuId);
+      if (!menu) return;
+      
+      editingMenuId = menuId;
+      document.getElementById('editMenuIcon').value = menu.icon;
+      document.getElementById('editMenuName').value = menu.name;
+      document.getElementById('editMenuPageId').value = menu.pageId;
+      document.getElementById('editMenuOrder').value = menu.order;
+      document.getElementById('editMenuHasSubmenu').checked = menu.hasSubmenu;
+      
+      const modal = document.getElementById('menuEditModal');
+      modal.style.display = 'flex';
+    }
+    
+    function closeMenuEditModal() {
+      document.getElementById('menuEditModal').style.display = 'none';
+      editingMenuId = null;
+    }
+    
+    function saveMenuEdit() {
+      const icon = document.getElementById('editMenuIcon').value.trim();
+      const name = document.getElementById('editMenuName').value.trim();
+      const pageId = document.getElementById('editMenuPageId').value.trim();
+      const order = parseInt(document.getElementById('editMenuOrder').value);
+      const hasSubmenu = document.getElementById('editMenuHasSubmenu').checked;
+      
+      if (!name || !pageId) {
+        alert('❌ 메뉴명과 페이지 ID는 필수입니다.');
+        return;
+      }
+      
+      if (editingMenuId) {
+        // 수정
+        const index = currentMenuData.findIndex(m => m.id === editingMenuId);
+        if (index >= 0) {
+          currentMenuData[index] = {
+            ...currentMenuData[index],
+            icon: icon || '📄',
+            name: name,
+            pageId: pageId,
+            order: order,
+            hasSubmenu: hasSubmenu
+          };
+        }
+      } else {
+        // 추가
+        currentMenuData.push({
+          id: pageId,
+          icon: icon || '📄',
+          name: name,
+          pageId: pageId,
+          order: order,
+          hasSubmenu: hasSubmenu
+        });
+      }
+      
+      // 순서대로 정렬
+      currentMenuData.sort((a, b) => a.order - b.order);
+      currentMenuData.forEach((menu, index) => {
+        menu.order = index + 1;
+      });
+      
+      renderMenuCards();
+      closeMenuEditModal();
+      
+      alert('✅ 메뉴가 저장되었습니다. "변경사항 저장" 버튼을 클릭하여 실제 적용하세요.');
+    }
+    
+    function moveMenuUp(menuId) {
+      const index = currentMenuData.findIndex(m => m.id === menuId);
+      if (index <= 0) return;
+      
+      [currentMenuData[index - 1], currentMenuData[index]] = [currentMenuData[index], currentMenuData[index - 1]];
+      
+      currentMenuData.forEach((menu, idx) => {
+        menu.order = idx + 1;
+      });
+      
+      renderMenuCards();
+    }
+    
+    function moveMenuDown(menuId) {
+      const index = currentMenuData.findIndex(m => m.id === menuId);
+      if (index < 0 || index >= currentMenuData.length - 1) return;
+      
+      [currentMenuData[index], currentMenuData[index + 1]] = [currentMenuData[index + 1], currentMenuData[index]];
+      
+      currentMenuData.forEach((menu, idx) => {
+        menu.order = idx + 1;
+      });
+      
+      renderMenuCards();
+    }
+    
+    function deleteMenu(menuId) {
+      if (!confirm('정말 이 메뉴를 삭제하시겠습니까?')) return;
+      
+      currentMenuData = currentMenuData.filter(m => m.id !== menuId);
+      
+      currentMenuData.forEach((menu, index) => {
+        menu.order = index + 1;
+      });
+      
+      renderMenuCards();
+    }
+    
+    function saveMenuChanges() {
+      alert('💡 메뉴 구조가 변경되었습니다!\\n\\n실제 HTML 파일을 업데이트하려면:\\n1. 현재 메뉴 데이터를 저장하고\\n2. 개발자에게 전달하여 HTML 파일을 업데이트해야 합니다.\\n\\n현재 데이터:\\n' + JSON.stringify(currentMenuData, null, 2));
+    }
+    });
+  </script>

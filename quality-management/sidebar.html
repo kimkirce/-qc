@@ -1,0 +1,298 @@
+<aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🏭</div>
+          <div>
+            <h1>품질관리 시스템</h1>
+            <span class="version-badge">v2.0 Premium</span>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">Overview</div>
+          <a class="nav-item active" onclick="showPage('dashboard')">
+            <span class="icon">🏠</span>
+            <span>대시보드</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Quality Modules</div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp101-submenu')">
+              <span class="icon">📊</span>
+              <span>공급사평가 (TP-101)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp101-submenu">
+              <a class="nav-subitem" onclick="showPage('tp101-r0')">
+                <span class="icon">📋</span>
+                <span>관리규정 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp101-01')">
+                <span class="icon">📝</span>
+                <span>실태조사서 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp101-02')">
+                <span class="icon">⭐</span>
+                <span>평가표 (02)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp101-03')">
+                <span class="icon">🔧</span>
+                <span>시정예방조치 (03)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp201-submenu')">
+              <span class="icon">🔄</span>
+              <span>변경점 관리 (TP-201)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp201-submenu">
+              <a class="nav-subitem" onclick="showPage('tp201-r0')">
+                <span class="icon">📋</span>
+                <span>변경점 관리 규정 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp201-01')">
+                <span class="icon">📝</span>
+                <span>변경점 관리 대장 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp201-02')">
+                <span class="icon">📄</span>
+                <span>변경점 신고서 (02)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp301-submenu')">
+              <span class="icon">📄</span>
+              <span>성적서발행 (TP-301)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp301-submenu">
+              <a class="nav-subitem" onclick="showPage('tp301-r0')">
+                <span class="icon">📋</span>
+                <span>수입/출하검사 기준서 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp301-01')">
+                <span class="icon">📝</span>
+                <span>출하검사 이력 관리 대장 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp301-02')">
+                <span class="icon">📄</span>
+                <span>수입/출하검사 성적서 (02)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp401-submenu')">
+              <span class="icon">📐</span>
+              <span>도면 관리 (TP-401)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp401-submenu">
+              <a class="nav-subitem" onclick="showPage('tp401-r0')">
+                <span class="icon">📋</span>
+                <span>도면 관리 규정 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp401-01')">
+                <span class="icon">📝</span>
+                <span>도면 배포 관리 대장 (01)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp501-submenu')">
+              <span class="icon">🏗️</span>
+              <span>현장관리 (TP-501)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp501-submenu">
+              <a class="nav-subitem" onclick="showPage('tp501-r0')">
+                <span class="icon">📋</span>
+                <span>현장관리 규정 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp501-01')">
+                <span class="icon">📝</span>
+                <span>3정5S 관리 대장 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp501-02')">
+                <span class="icon">🌡️</span>
+                <span>온/습도 관리 대장 (02)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp601-submenu')">
+              <span class="icon">⚠️</span>
+              <span>고객불만 (TP-601)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp601-submenu">
+              <a class="nav-subitem" onclick="showPage('tp601-r0')">
+                <span class="icon">📋</span>
+                <span>고객 불만 처리 규정 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp601-01')">
+                <span class="icon">📝</span>
+                <span>부적합 발생 관리 대장 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp601-02')">
+                <span class="icon">✅</span>
+                <span>개선대책 유효성 평가서 (02)</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Inspection & Standards</div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp701-submenu')">
+              <span class="icon">✅</span>
+              <span>공정검사 (TP-701)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp701-submenu">
+              <a class="nav-subitem" onclick="showPage('tp701-r0')">
+                <span class="icon">📋</span>
+                <span>공정검사 규정 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp701-01')">
+                <span class="icon">📝</span>
+                <span>공정검사 관리 대장 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp701-02')">
+                <span class="icon">📊</span>
+                <span>QC 공정도 (02)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp701-03')">
+                <span class="icon">✓</span>
+                <span>공정검사 CHECK SHEET (03)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp801-submenu')">
+              <span class="icon">🔍</span>
+              <span>이상동작검출 (TP-801)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp801-submenu">
+              <a class="nav-subitem" onclick="showPage('tp801-r0')">
+                <span class="icon">📋</span>
+                <span>검사JIG 관리대장 (R0)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp801-01')">
+                <span class="icon">📝</span>
+                <span>검사JIG 일상점검 관리SHEET (01)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp901-submenu')">
+              <span class="icon">📋</span>
+              <span>작업표준서 (TP-901)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp901-submenu">
+              <a class="nav-subitem" onclick="showPage('tp901-01')">
+                <span class="icon">📄</span>
+                <span>공통제작 작업표준서 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp901-02')">
+                <span class="icon">🔌</span>
+                <span>하네스 작업표준서 (02)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp901-03')">
+                <span class="icon">⚙️</span>
+                <span>하네스 장비 지침서 (03)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp901-04')">
+                <span class="icon">📍</span>
+                <span>릴레이 표준핀맵 (04)</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp1001-submenu')">
+              <span class="icon">🔧</span>
+              <span>조립SOP (TP-1001)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp1001-submenu">
+              <a class="nav-subitem" onclick="showPage('tp1001-gemini')">
+                <span class="icon">🌟</span>
+                <span>GEMINI</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp1001-dpt')">
+                <span class="icon">🔷</span>
+                <span>DPT</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp1001-cuarto')">
+                <span class="icon">🔶</span>
+                <span>CUARTO</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('tp1101-submenu')">
+              <span class="icon">📏</span>
+              <span>검사기준 (TP-1101)</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="tp1101-submenu">
+              <a class="nav-subitem" onclick="showPage('tp1101-01')">
+                <span class="icon">⚠️</span>
+                <span>기 불량 중점관리 항목 (01)</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('tp1101-02')">
+                <span class="icon">📝</span>
+                <span>부적합 발생 이력 (02)</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System Settings</div>
+          
+          <div class="nav-group">
+            <a class="nav-item" onclick="toggleSubmenu('settings-submenu')">
+              <span class="icon">⚙️</span>
+              <span>설정</span>
+              <span class="expand-icon">▼</span>
+            </a>
+            <div class="nav-submenu" id="settings-submenu">
+              <a class="nav-subitem" onclick="showPage('company-register')">
+                <span class="icon">🏢</span>
+                <span>업체 등록</span>
+              </a>
+              <a class="nav-subitem" onclick="showPage('menu-manage')">
+                <span class="icon">📋</span>
+                <span>메뉴 관리</span>
+              </a>
+              <a class="nav-subitem" onclick="showResetMenu()">
+                <span class="icon">🔄</span>
+                <span>데이터 초기화</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    
+    </aside>

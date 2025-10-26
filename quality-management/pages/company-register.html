@@ -1,0 +1,80 @@
+<div id="company-register" class="page-content">
+
+        <div class="page-header">
+          <h2>🏢 업체 등록</h2>
+          <p>공급사 평가에 사용할 업체 정보를 등록합니다</p>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="addNewCompany()">➕ 신규 업체 추가</button>
+          <button class="btn btn-success" onclick="saveCompanyList()">💾 저장</button>
+          <button class="btn btn-secondary" onclick="loadCompanyList()">🔄 새로고침</button>
+        </div>
+
+        <!-- 업체 추가 폼 -->
+        <div class="form-container" style="margin-bottom: 24px;">
+          <h3 style="margin-bottom: 16px;">새 업체 정보</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>업체명 *</label>
+              <input type="text" id="newCompanyName" placeholder="업체명을 입력하세요">
+            </div>
+            <div class="form-group">
+              <label>사업자번호</label>
+              <input type="text" id="newCompanyBusinessNo" placeholder="000-00-00000">
+            </div>
+            <div class="form-group">
+              <label>대표자</label>
+              <input type="text" id="newCompanyCeo" placeholder="대표자명">
+            </div>
+            <div class="form-group">
+              <label>담당자</label>
+              <input type="text" id="newCompanyManager" placeholder="담당자명">
+            </div>
+            <div class="form-group">
+              <label>전화번호</label>
+              <input type="text" id="newCompanyPhone" placeholder="000-0000-0000">
+            </div>
+            <div class="form-group">
+              <label>이메일</label>
+              <input type="email" id="newCompanyEmail" placeholder="company@example.com">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>주소</label>
+              <input type="text" id="newCompanyAddress" placeholder="주소를 입력하세요">
+            </div>
+          </div>
+        </div>
+
+        <!-- 등록된 업체 목록 -->
+        <div class="form-container">
+          <h3 style="margin-bottom: 16px;">등록된 업체 목록</h3>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: var(--bg-secondary); border-bottom: 2px solid var(--border);">
+                  <th style="padding: 12px; text-align: left; font-weight: 600;">업체명</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600;">사업자번호</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600;">대표자</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600;">담당자</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600;">전화번호</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 600;">이메일</th>
+                  <th style="padding: 12px; text-align: center; font-weight: 600; width: 100px;">관리</th>
+                </tr>
+              </thead>
+              <tbody id="companyListTable">
+                <tr>
+                  <td colspan="7" style="padding: 40px; text-align: center; color: var(--text-tertiary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🏢</div>
+                    <div>등록된 업체가 없습니다</div>
+                    <div style="font-size: 13px; margin-top: 8px;">위의 폼에서 새 업체를 추가해주세요</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 메뉴 관리 페이지 -->
+      </div>
